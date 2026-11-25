@@ -3,6 +3,7 @@
 **NIM:** 24552011357  
 **Lingkungan:** Kali Linux (VirtualBox), Docker  
 **Workspace:** `/root/UTS-Network-Security/`
+**Perhitungan kasus:** digit NIM dijumlah → 2+4+5+5+2+0+1+1+3+5+7 = 35, lalu 35 mod 10 = 5. Jadi Kasus 5.
 
 ---
 
