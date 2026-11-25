@@ -1,0 +1,7 @@
+dns-1  | dnsmasq[1]: started, version 2.90 cachesize 150
+dns-1  | dnsmasq[1]: DNS service limited to local subnets
+dns-1  | dnsmasq[1]: compile time options: IPv6 GNU-getopt no-DBus no-UBus no-i18n no-IDN DHCP DHCPv6 no-Lua TFTP no-conntrack ipset no-nftset auth no-cryptohash no-DNSSEC loop-detect inotify dumpfile
+dns-1  | dnsmasq[1]: warning: no upstream servers configured
+dns-1  | dnsmasq[1]: read /etc/hosts - 9 names
+dns-1  | dnsmasq[1]: query[A] 3234353532303131333537.k5.exfil.lab from 172.20.0.3
+dns-1  | dnsmasq[1]: config 3234353532303131333537.k5.exfil.lab is 10.0.0.99
